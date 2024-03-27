@@ -1,6 +1,6 @@
 import gym
 from dqn_torch import Agent
-#from deepQ import Agent
+#from DeepQ import Agent
 from utils_local import plotLearning
 import numpy as np
 
@@ -15,13 +15,18 @@ if __name__ == '__main__':
         done = False
         observation = env.reset()
         while not done:
-            action = agent.choose_action(observation)
-            observation_, reward, done, info = env.step(action)
+            if isinstance(observation, tuple):
+                state, _ = observation 
+                action = agent.choose_action(state)
+            else:
+                action = agent.choose_action(observation)
+                print("Observation type:", type(observation), "Contents:", observation)
+            step_result = env.step(action)
+            print("Step result:", step_result)
+            observation, reward, done, info = step_result[:4]
             score += reward
-            agent.store_transition(observation, action, reward, 
-                                    observation_, done)
+            agent.store_transition(observation, action, reward, observation, done)
             agent.learn()
-            observation = observation_
         scores.append(score)
         eps_history.append(agent.epsilon)
 
